@@ -18,15 +18,16 @@ const config: Config = {
           800: '#1A1A1F',
           700: '#2A2A31',
         },
+        // ACCENT — LOCKED TO COBALT (Day 2 decision)
         cobalt: {
-          accent: '#2563EB',
-          glow: '#3B82F6',
-          muted: '#1D4ED8',
+          accent: '#2563EB',   // Primary accent — sparingly
+          glow: '#3B82F6',     // Hover states, active indicators
+          muted: '#1D4ED8',    // Pressed states
+          subtle: '#EFF6FF',   // Never use on dark bg — reserved for future light elements
+          particle: '#60A5FA', // Particle shader color — slightly lighter for bloom effect
         },
-        amber: {
-          accent: '#F59E0B',
-          glow: '#FBB024',
-        },
+        // RESERVED — do not use until Human unlocks
+        // amber: { accent: '#F59E0B', glow: '#FBB024' },
         white: {
           pure: '#FFFFFF',
           muted: '#A1A1AA',

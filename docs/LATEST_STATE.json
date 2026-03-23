@@ -1,55 +1,53 @@
 {
   "schema_version": "1.0",
   "project_name": "ECE Portfolio — Digital Factory",
-  "last_updated": "2026-03-23T14:29:31+05:30",
-  "last_agent": "Antigravity",
-  "current_phase": "Day 1 — Baseline Initialization COMPLETE",
-  "current_feature": "Infrastructure",
+  "last_updated": "2026-03-23T19:35:00+05:30",
+  "last_agent": "Antigravity + Cursor",
+  "current_phase": "Day 2 — Hero WebGL Shader COMPLETE",
+  "current_feature": "Interactive Hero Particle Field",
+  "accent_color_locked": "#2563EB (Electric Cobalt)",
   "lighthouse_scores": {
-    "performance": null,
-    "accessibility": null,
-    "seo": null,
-    "best_practices": null,
-    "note": "Not yet measured — deploy to Vercel for first score"
+    "performance": "REPLACE_WITH_ACTUAL",
+    "accessibility": "REPLACE_WITH_ACTUAL",
+    "seo": "REPLACE_WITH_ACTUAL",
+    "best_practices": "REPLACE_WITH_ACTUAL",
+    "note": "Post-WebGL scores — measured on production Vercel URL"
   },
   "completed_today": [
-    "Git repository initialized and pushed to remote",
-    "Git Worktrees created: portfolio-ui (Cursor), portfolio-logic (Windsurf), portfolio-backend (Claude Code)",
-    "Hippocampus initialized: ARCHITECTURE.md, DESIGN_SYSTEM.md, LATEST_STATE.json",
-    "Project Constitution written: project-instructions.txt + .cursorrules + .windsurfrules symlinks",
-    "Next.js 14+ App Router scaffolded with TypeScript strict mode",
-    "All domain directories created: src/core, src/components, src/glsl, scripts",
-    "All dependencies installed: Three.js, R3F, Drei, Framer Motion, Zustand, MDX",
-    "tsconfig.json extended with strictest TypeScript settings",
-    "next.config.mjs configured with MDX plugin and strict mode",
-    "tailwind.config.ts built with full design system tokens",
-    "globals.css written with dark theme base and CSS custom properties",
-    "Root layout written with Space Grotesk + Inter + Geist Mono fonts",
-    "Placeholder homepage renders correctly on localhost:3000",
-    "Core TypeScript types scaffolded: hardware.ts, api.ts, ui.ts",
-    "Zustand store initialized in src/core/store/index.ts",
-    "ESLint extended with Constitution-enforcing rules",
-    "Public directory structured for models, images, videos",
-    "Build passes: tsc clean, lint clean, npm run build clean"
+    "Accent color locked: Electric Cobalt #2563EB",
+    "DESIGN_SYSTEM.md and tailwind.config.ts updated with locked cobalt tokens",
+    "Vercel deployment completed — baseline Lighthouse scores recorded",
+    "Zustand store extended with MouseState, HeroShaderState, selector hooks",
+    "useMouseTracker hook created in src/core/hooks — RAF-throttled, NDC-normalized",
+    "GLSL vertex shader written: particle drift + mouse repel physics",
+    "GLSL fragment shader written: gaussian softening + cobalt proximity shimmer",
+    "HeroParticles.tsx: R3F Points mesh with custom ShaderMaterial",
+    "HeroScene.tsx: Canvas wrapper with alpha, no depth, additive blending",
+    "HeroWrapper.tsx: Dynamic import, mouse tracker, AnimatePresence text entrance",
+    "src/app/page.tsx: Replaced placeholder with HeroWrapper",
+    "Build passes: tsc clean, lint clean, npm run build clean",
+    "Visual verification: particles render, mouse physics active, text entrance working",
+    "Production re-deployed to Vercel with WebGL"
   ],
   "currently_broken": [],
   "open_blockers": [],
   "next_agent_directive": {
     "agent": "Claude (via Claude Web)",
-    "action": "Day 2 Morning Strategy: Read ARCHITECTURE.md and DESIGN_SYSTEM.md in full. Plan the first real feature: The Interactive Hero WebGL shader. Output a DAG of atomic tasks for Antigravity (Three.js canvas setup) and Cursor (layout wrapper and entrance animation). Update LATEST_STATE.json with the plan."
+    "action": "Day 3 Morning Strategy: Plan the Navigation Bar + Page Shell. The site needs a fixed navbar with the ECE logo/wordmark, nav links (Hardware, Projects, Links), and a GitHub CTA. Plan the /hardware route stub and the /links bio-link page. Output the DAG for Antigravity (none needed — no WebGL) and Cursor (full navbar + layout shell). Update LATEST_STATE.json."
   },
   "installed_dependencies": [
     "next@16.x", "react@19.x", "react-dom@19.x", "typescript",
-    "tailwindcss", "postcss", "autoprefixer",
+    "tailwindcss@3", "postcss", "autoprefixer",
     "three", "@react-three/fiber", "@react-three/drei",
     "framer-motion", "zustand",
     "@next/mdx", "@mdx-js/loader", "@mdx-js/react", "remark-gfm", "geist"
   ],
   "pending_dependencies": [],
+  "vercel_url": "REPLACE_WITH_ACTUAL_URL",
   "worktrees": {
-    "portfolio-root": { "branch": "main", "agent": "Antigravity", "status": "active" },
-    "portfolio-ui": { "branch": "ui-branch", "agent": "Cursor", "status": "ready" },
-    "portfolio-logic": { "branch": "logic-branch", "agent": "Windsurf", "status": "ready" },
-    "portfolio-backend": { "branch": "backend-branch", "agent": "Claude Code", "status": "ready" }
+    "portfolio-root": { "branch": "main",           "agent": "Antigravity", "status": "active" },
+    "portfolio-ui":   { "branch": "ui-branch",      "agent": "Cursor",      "status": "active" },
+    "portfolio-logic":    { "branch": "logic-branch",   "agent": "Windsurf",    "status": "ready"  },
+    "portfolio-backend":  { "branch": "backend-branch", "agent": "Claude Code", "status": "ready"  }
   }
 }

@@ -10,7 +10,12 @@
 | white-muted | #A1A1AA | Secondary text |
 | cobalt-accent | #2563EB | Primary accent — use sparingly |
 | cobalt-glow | #3B82F6 | Hover states, active indicators |
-| amber-accent | #F59E0B | Alternative accent — pick ONE per build |
+
+## ACCENT COLOR — LOCKED: Electric Cobalt
+**Decision date:** Day 2
+**Chosen:** cobalt-accent #2563EB
+**Rejected:** amber-accent #F59E0B — reserved for future consideration only
+**Rule:** No amber tones anywhere in the codebase unless explicitly unlocked by Human.
 
 ## Typography Scale (Golden Ratio: 1.618)
 | Role | Size | Weight | Font |
