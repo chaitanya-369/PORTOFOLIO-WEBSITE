@@ -23,16 +23,26 @@ export const HeroWrapper: React.FC = () => {
   useMouseTracker({ targetRef: containerRef })
 
   return (
+    // NO aria-hidden on the outer container — it contains interactive elements
     <div
       ref={containerRef}
       className="relative w-full h-screen overflow-hidden bg-obsidian-950"
-      aria-hidden="true"  // Decorative — not read by screen readers
+      style={{ willChange: 'transform' }}
     >
-      {/* WebGL Canvas — rendered behind all DOM content */}
-      <HeroScene />
+      {/*
+        ── DECORATIVE LAYER ──────────────────────────────────────────────────
+        aria-hidden="true" applied ONLY to the visual/decorative elements.
+        Screen readers skip these entirely.
+      */}
 
-      {/* Radial vignette overlay — darkens edges to ground the particles */}
+      {/* WebGL Canvas — purely visual, no semantic content */}
+      <div aria-hidden="true" className="absolute inset-0">
+        <HeroScene />
+      </div>
+
+      {/* Radial vignette — purely visual */}
       <div
+        aria-hidden="true"
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
@@ -40,14 +50,24 @@ export const HeroWrapper: React.FC = () => {
         }}
       />
 
-      {/* Hero text content — entrance animation triggered when shader is ready */}
+      {/*
+        ── CONTENT LAYER ─────────────────────────────────────────────────────
+        NOT aria-hidden. Headings and interactive elements must be accessible.
+        pointer-events-none on the wrapper so the WebGL canvas receives mouse
+        events; pointer-events-auto re-enabled on the CTA row specifically.
+      */}
       <AnimatePresence>
         {isHeroReady && (
           <motion.div
             className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 60, damping: 20, mass: 1.5 }}
+            transition={{
+              type: 'spring',
+              stiffness: 60,
+              damping: 20,
+              mass: 1.5,
+            }}
           >
             {/* Eyebrow label */}
             <motion.p
@@ -64,7 +84,7 @@ export const HeroWrapper: React.FC = () => {
               ECE Engineer
             </motion.p>
 
-            {/* Primary heading */}
+            {/* Primary heading — semantic H1, accessible */}
             <motion.h1
               className="font-display text-hero text-white-pure text-center leading-none tracking-tight max-w-4xl px-8"
               initial={{ opacity: 0, y: 24 }}
@@ -97,7 +117,7 @@ export const HeroWrapper: React.FC = () => {
               PCB Design · VLSI · Embedded Systems · Robotics
             </motion.p>
 
-            {/* CTA row */}
+            {/* CTA row — pointer-events-auto re-enabled here only */}
             <motion.div
               className="flex gap-4 mt-10 pointer-events-auto"
               initial={{ opacity: 0, y: 12 }}
@@ -109,9 +129,10 @@ export const HeroWrapper: React.FC = () => {
                 delay: 0.5,
               }}
             >
+              {/* Primary CTA */}
               <motion.a
                 href="/hardware"
-                className="px-6 py-3 bg-cobalt-accent text-white-pure font-body font-medium text-sm tracking-wide rounded-none border border-cobalt-accent"
+                className="px-6 py-3 bg-cobalt-accent text-white-pure font-body font-medium text-sm tracking-wide border border-cobalt-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-glow focus-visible:ring-offset-2 focus-visible:ring-offset-obsidian-950"
                 whileHover={{
                   scale: 1.02,
                   backgroundColor: '#1D4ED8',
@@ -125,11 +146,12 @@ export const HeroWrapper: React.FC = () => {
                 View Hardware
               </motion.a>
 
+              {/* Secondary CTA */}
               <motion.a
                 href="https://github.com/chaitanya-369"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-6 py-3 bg-transparent text-white-muted font-body font-medium text-sm tracking-wide border border-obsidian-800"
+                className="px-6 py-3 bg-transparent text-white-muted font-body font-medium text-sm tracking-wide border border-obsidian-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-glow focus-visible:ring-offset-2 focus-visible:ring-offset-obsidian-950"
                 whileHover={{
                   borderColor: '#2563EB',
                   color: '#FFFFFF',
@@ -140,34 +162,39 @@ export const HeroWrapper: React.FC = () => {
                   transition: { type: 'spring', stiffness: 600, damping: 40 },
                 }}
               >
-                GitHub
+                GitHub ↗
               </motion.a>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Scroll indicator */}
+      {/*
+        ── SCROLL INDICATOR ──────────────────────────────────────────────────
+        Decorative — aria-hidden. Uses CSS animation (not Framer Motion)
+        because infinite repeating springs produce erratic behavior.
+        See globals.css .scroll-pulse for the animation definition.
+      */}
       <AnimatePresence>
         {isHeroReady && (
           <motion.div
+            aria-hidden="true"
             className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.2, duration: 0.6 }}
+            transition={{
+              type: 'spring',
+              stiffness: 60,
+              damping: 20,
+              mass: 1.2,
+              delay: 1.2,
+            }}
           >
             <span className="font-mono text-white-faint text-xs tracking-widest uppercase">
               Scroll
             </span>
-            <motion.div
-              className="w-px h-8 bg-gradient-to-b from-white-faint to-transparent"
-              animate={{ scaleY: [1, 0.4, 1] }}
-              transition={{
-                repeat: Infinity,
-                duration: 2,
-                ease: 'easeInOut',
-              }}
-            />
+            {/* CSS-animated — no JS thread cost, no Law 1 violation */}
+            <div className="scroll-pulse w-px h-8 bg-gradient-to-b from-white-faint to-transparent" />
           </motion.div>
         )}
       </AnimatePresence>

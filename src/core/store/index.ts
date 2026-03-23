@@ -7,6 +7,7 @@
 'use client'
 
 import { create } from 'zustand'
+import { useShallow } from 'zustand/react/shallow'
 import type { ModelLoadState } from '@/core/types'
 
 // ─── MOUSE PHYSICS STATE ────────────────────────────────────────────────────
@@ -129,18 +130,29 @@ export const useAppStore = create<AppStore>((set, get) => ({
 }))
 
 // ─── SELECTOR HOOKS (prevents unnecessary re-renders) ───────────────────────
+// useShallow performs shallow property comparison instead of reference equality.
+// Without it, selector functions returning new object literals always trigger
+// re-renders even when all property values are identical.
 
 export const useMouseState = (): MouseState =>
-  useAppStore((s) => ({
-    x: s.x, y: s.y,
-    rawX: s.rawX, rawY: s.rawY,
-    velocityX: s.velocityX, velocityY: s.velocityY,
-    speed: s.speed, isOverCanvas: s.isOverCanvas,
-  }))
+  useAppStore(
+    useShallow((s) => ({
+      x: s.x,
+      y: s.y,
+      rawX: s.rawX,
+      rawY: s.rawY,
+      velocityX: s.velocityX,
+      velocityY: s.velocityY,
+      speed: s.speed,
+      isOverCanvas: s.isOverCanvas,
+    }))
+  )
 
 export const useHeroShaderState = (): HeroShaderState =>
-  useAppStore((s) => ({
-    isHeroReady: s.isHeroReady,
-    frameCount: s.frameCount,
-    particleCount: s.particleCount,
-  }))
+  useAppStore(
+    useShallow((s) => ({
+      isHeroReady: s.isHeroReady,
+      frameCount: s.frameCount,
+      particleCount: s.particleCount,
+    }))
+  )
