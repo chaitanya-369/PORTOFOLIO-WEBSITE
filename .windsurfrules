@@ -1,0 +1,135 @@
+# ECE PORTFOLIO — PROJECT CONSTITUTION
+# This file is the supreme law of this codebase.
+# All AI agents must read this entire file before generating any code.
+# Violations of these laws will be caught in code review and rejected.
+
+===============================================================================
+LAW 1: THE PHYSICS ENGINE LAW
+===============================================================================
+CSS transitions are BANNED for interactive elements.
+The following patterns will cause your output to be REJECTED:
+
+  BANNED: transition: all 0.3s ease;
+  BANNED: transition: opacity 0.2s ease-in-out;
+  BANNED: animation: fadeIn 0.5s linear;
+  BANNED: @keyframes used on user-interactive elements
+
+REQUIRED: All interactive motion uses Framer Motion with explicit spring physics.
+Template (copy and customize values — never use defaults blindly):
+
+  <motion.div
+    whileHover={{ scale: 1.02, y: -2 }}
+    whileTap={{ scale: 0.98 }}
+    transition={{ type: "spring", stiffness: 400, damping: 30, mass: 1 }}
+  />
+
+Spring presets (defined in DESIGN_SYSTEM.md):
+  - Default:  { stiffness: 400, damping: 30, mass: 1 }
+  - Snappy:   { stiffness: 600, damping: 40, mass: 0.8 }
+  - Heavy:    { stiffness: 200, damping: 25, mass: 1.5 }
+
+The UI must feel like it has physical mass. Every interaction must feel like
+touching real hardware. If it doesn't feel physical, it is wrong.
+
+===============================================================================
+LAW 2: THE TYPESCRIPT LAW
+===============================================================================
+TypeScript strict mode is ACTIVE. The build will FAIL on violations.
+
+  BANNED: any — do not use this type under any circumstance
+  BANNED: @ts-ignore — do not suppress type errors
+  BANNED: @ts-expect-error — do not suppress type errors
+  BANNED: as unknown as X — do not use double casting to escape the type system
+  BANNED: Implicit return types on exported functions
+
+REQUIRED patterns:
+  - All API response shapes must have explicit interfaces in src/core/types/
+  - All React components typed as: const ComponentName: React.FC<Props> = ...
+  - All async functions typed with explicit return: async function foo(): Promise<Bar>
+  - All hardware model data typed with generics — no raw object shapes
+
+If you need to use a third-party library that has poor types, create a
+declaration file in src/core/types/declarations.d.ts and document why.
+
+===============================================================================
+LAW 3: THE CONTEXT HANDOVER LAW
+===============================================================================
+Before ending any session, you MUST output a JSON payload and write it
+to docs/LATEST_STATE.json. The format is:
+
+{
+  "last_updated": "<ISO 8601 datetime>",
+  "last_agent": "<your agent name>",
+  "completed_today": ["<exact description of what you finished>"],
+  "currently_broken": ["<exact description of what is broken and why>"],
+  "open_blockers": ["<anything blocking the next agent>"],
+  "next_agent_directive": {
+    "agent": "<which agent goes next>",
+    "action": "<exact instruction for what they must do first>"
+  }
+}
+
+Failure to update LATEST_STATE.json means the next agent starts blind.
+This is the most operationally critical law in the project.
+
+===============================================================================
+LAW 4: THE ISOLATION LAW
+===============================================================================
+Domain boundaries are ABSOLUTE. Importing across domain lines is BANNED.
+
+  BANNED: Importing from src/glsl inside src/components
+  BANNED: Importing from src/components inside src/glsl
+  BANNED: Importing CSS/Tailwind classes inside src/core
+  BANNED: Using Three.js/R3F state directly inside React DOM components
+  BANNED: Using React DOM APIs (useRef to DOM elements) inside src/glsl scenes
+
+REQUIRED: Use Zustand as the ONLY bridge between the WebGL canvas and the DOM.
+  - The Zustand store lives in: src/core/store/
+  - src/glsl reads from and writes to the Zustand store
+  - src/components reads from and writes to the Zustand store
+  - src/glsl and src/components never communicate directly
+
+The isolation law exists to prevent GPU memory leaks. Three.js creates
+WebGL contexts that do not garbage-collect with React's DOM lifecycle.
+Mixing them causes the browser to crash on mobile devices.
+
+===============================================================================
+LAW 5: THE PERFORMANCE LAW
+===============================================================================
+Target: 100/100 Lighthouse score on mobile. Non-negotiable.
+
+  BANNED: Client Components for content that can be Server Components
+  BANNED: Importing entire icon libraries (import * from 'lucide-react')
+  BANNED: Synchronous data fetching that blocks the render
+  BANNED: Images without next/image optimization
+  BANNED: Fonts loaded from external CDN (use next/font only)
+
+REQUIRED:
+  - All static content pages use React Server Components (no 'use client')
+  - 'use client' is only permitted for: animation, WebGL, user interaction
+  - All images use Next.js <Image> component with explicit width/height
+  - All fonts loaded via next/font/google with display: 'swap'
+  - Dynamic imports with loading states for all heavy components (Three.js)
+
+===============================================================================
+LAW 6: THE COMMIT LAW
+===============================================================================
+Every commit must follow Conventional Commits format exactly:
+
+  feat(scope): description       ← New feature
+  fix(scope): description        ← Bug fix
+  docs(scope): description       ← Documentation only
+  style(scope): description      ← CSS/visual only, no logic change
+  refactor(scope): description   ← Code restructure, no behavior change
+  perf(scope): description       ← Performance improvement
+  chore(scope): description      ← Build, config, dependency changes
+
+Valid scopes: webgl, ui, core, animation, mdx, api, config, docs, scripts
+
+Examples:
+  feat(webgl): add liquid metal shader with mouse physics
+  fix(animation): correct spring damping on hero button entrance
+  perf(core): memoize GitHub GraphQL query result
+  chore(config): add Zustand to dependency list
+
+One commit = one atomic change. Do not bundle unrelated work.
