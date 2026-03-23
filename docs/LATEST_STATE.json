@@ -39,7 +39,7 @@
     "action": "Day 2 Morning Strategy: Read ARCHITECTURE.md and DESIGN_SYSTEM.md in full. Plan the first real feature: The Interactive Hero WebGL shader. Output a DAG of atomic tasks for Antigravity (Three.js canvas setup) and Cursor (layout wrapper and entrance animation). Update LATEST_STATE.json with the plan."
   },
   "installed_dependencies": [
-    "next@14.x", "react@18.x", "react-dom@18.x", "typescript",
+    "next@16.x", "react@19.x", "react-dom@19.x", "typescript",
     "tailwindcss", "postcss", "autoprefixer",
     "three", "@react-three/fiber", "@react-three/drei",
     "framer-motion", "zustand",
