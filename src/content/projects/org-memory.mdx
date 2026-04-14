@@ -1,0 +1,29 @@
+export const metadata = {
+  title: 'ORG-MEMORY',
+}
+
+## Contextual Memory Store
+
+ORG-MEMORY is an organizational long-term memory layer for LLMs. Instead of every AI workflow starting with a blank context, ORG-MEMORY provides a persistent, team-scoped semantic database.
+
+### The Problem
+Agents running standalone tasks had no shared understanding of past decisions. Team "A" would ask an AI to summarize a codebase, and next week, Team "B" would ask the exact same thing.
+
+### Hierarchical Data Structure
+*   **Workspaces:** Boundary isolating distinct tenant teams.
+*   **Knowledge Contexts:** Topical buckets (e.g., "Architecture Decisions", "API Specs").
+*   **Memories:** The atomic units of context. Stored as raw text chunks, indexed with robust vector embeddings (OpenAI `text-embedding-3-small`).
+
+When an LLM prepares a context window, it queries the ORG-MEMORY REST API with semantic search, injecting relevant historical text seamlessly.
+
+### Hybrid Search Implementation
+
+Vector search alone misses precise keyword matches (e.g., specific error codes). ORG-MEMORY employs a hybrid approach:
+
+1.  **Dense Retrieval:** Redis Stack handles HNSW indexing for the semantic vector similarity.
+2.  **Sparse Retrieval:** BM25 scoring layer runs over keyword fields.
+3.  **Reciprocal Rank Fusion (RRF):** Both score lists are combined out-of-the-box before returning to the calling agent.
+
+---
+
+> By introducing a single source-of-truth memory store, the organization's LLM workflows saw a 40% reduction in token burn and massive spikes in context relevance. It fundamentally altered the AI orchestration strategy.

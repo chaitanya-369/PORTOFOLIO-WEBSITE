@@ -1,53 +1,61 @@
 {
-  "schema_version": "1.0",
-  "project_name": "ECE Portfolio — Digital Factory",
-  "last_updated": "2026-03-23T19:35:00+05:30",
-  "last_agent": "Antigravity + Cursor",
-  "current_phase": "Day 2 — Hero WebGL Shader COMPLETE",
-  "current_feature": "Interactive Hero Particle Field",
-  "accent_color_locked": "#2563EB (Electric Cobalt)",
-  "lighthouse_scores": {
-    "performance": "REPLACE_WITH_ACTUAL",
-    "accessibility": "REPLACE_WITH_ACTUAL",
-    "seo": "REPLACE_WITH_ACTUAL",
-    "best_practices": "REPLACE_WITH_ACTUAL",
-    "note": "Post-WebGL scores — measured on production Vercel URL"
-  },
+  "last_updated": "2026-04-14T20:46:00+05:30",
+  "last_agent": "Antigravity",
+  "current_phase": "Phase 2 — Core Pages Complete",
+  "current_feature": "GitHub Contribution Heatmap + Page Transitions",
+
+  "session_summary": "Full audit of all 4 planning documents. Built 5 major features in sequence.",
+
   "completed_today": [
-    "Accent color locked: Electric Cobalt #2563EB",
-    "DESIGN_SYSTEM.md and tailwind.config.ts updated with locked cobalt tokens",
-    "Vercel deployment completed — baseline Lighthouse scores recorded",
-    "Zustand store extended with MouseState, HeroShaderState, selector hooks",
-    "useMouseTracker hook created in src/core/hooks — RAF-throttled, NDC-normalized",
-    "GLSL vertex shader written: particle drift + mouse repel physics",
-    "GLSL fragment shader written: gaussian softening + cobalt proximity shimmer",
-    "HeroParticles.tsx: R3F Points mesh with custom ShaderMaterial",
-    "HeroScene.tsx: Canvas wrapper with alpha, no depth, additive blending",
-    "HeroWrapper.tsx: Dynamic import, mouse tracker, AnimatePresence text entrance",
-    "src/app/page.tsx: Replaced placeholder with HeroWrapper",
-    "Build passes: tsc clean, lint clean, npm run build clean",
-    "Visual verification: particles render, mouse physics active, text entrance working",
-    "Production re-deployed to Vercel with WebGL"
+    "AUDIT: Read ECE_Portfolio_Deep_Technical_Summary.md, master_architecture_blueprint.md, PROJECT SUMMARY.pdf, README.md — full line-by-line gap analysis",
+    "FEAT: /links bio-link page — CS monogram, discipline tags, 5 spring-physics link cards (Portfolio, GitHub, LinkedIn, YouTube, Email), staggered entrance",
+    "FEAT: /software gallery — filter tabs (All/Gateway/Infra/Web/Tools) with layoutId animated indicator, 3-column project grid, AnimatePresence filter transitions, stats row, dual CTA",
+    "FEAT: PageTransitionWrapper — AnimatePresence at root layout, usePathname key, mode='wait', initial=false, spring physics enter/exit",
+    "FEAT: GitHub contribution heatmap — server-side fetch via Jogruber API (no token), 52x7 grid, cobalt intensity scale, hover tooltip, month/day labels, legend, 1hr edge cache",
+    "DATA: src/core/data/software-projects.ts — SoftwareProject type, 3 projects (API Saviour LIVE, ORG-MEMORY LIVE, This Portfolio WIP), filter config",
+    "DATA: src/core/api/github.ts — server-only fetcher, ContributionDay/Week/GitHubContributionData types, getMonthLabels helper, graceful empty fallback",
+    "UPDATE: src/app/page.tsx — async Server Component, server-side contribution fetch, heatmap wired below FeaturedSection",
+    "UPDATE: docs/LATEST_STATE.json — this file",
+    "UPDATE: README.md — replaced create-next-app boilerplate with full living portfolio documentation"
   ],
+
   "currently_broken": [],
-  "open_blockers": [],
-  "next_agent_directive": {
-    "agent": "Claude (via Claude Web)",
-    "action": "Day 3 Morning Strategy: Plan the Navigation Bar + Page Shell. The site needs a fixed navbar with the ECE logo/wordmark, nav links (Hardware, Projects, Links), and a GitHub CTA. Plan the /hardware route stub and the /links bio-link page. Output the DAG for Antigravity (none needed — no WebGL) and Cursor (full navbar + layout shell). Update LATEST_STATE.json."
-  },
-  "installed_dependencies": [
-    "next@16.x", "react@19.x", "react-dom@19.x", "typescript",
-    "tailwindcss@3", "postcss", "autoprefixer",
-    "three", "@react-three/fiber", "@react-three/drei",
-    "framer-motion", "zustand",
-    "@next/mdx", "@mdx-js/loader", "@mdx-js/react", "remark-gfm", "geist"
+
+  "open_blockers": [
+    "HUMAN REQUIRED: /hardware page — WebGL 3D viewer code is 100% built (HardwareScene.tsx, HardwareSidebar.tsx, Zustand selectors) but paused. Needs .glb CAD files from user before activation.",
+    "HUMAN REQUIRED: /links page — LinkedIn, YouTube, Email URLs are still [PLACEHOLDER]. User must fill in src/components/links/LinksPageClient.tsx lines 57, 62, 67.",
+    "HUMAN REQUIRED: MDX case studies — src/app/projects/[slug]/ route exists. Need actual content (engineering write-ups per project)."
   ],
-  "pending_dependencies": [],
-  "vercel_url": "REPLACE_WITH_ACTUAL_URL",
-  "worktrees": {
-    "portfolio-root": { "branch": "main",           "agent": "Antigravity", "status": "active" },
-    "portfolio-ui":   { "branch": "ui-branch",      "agent": "Cursor",      "status": "active" },
-    "portfolio-logic":    { "branch": "logic-branch",   "agent": "Windsurf",    "status": "ready"  },
-    "portfolio-backend":  { "branch": "backend-branch", "agent": "Claude Code", "status": "ready"  }
-  }
+
+  "page_status": {
+    "/":          "DONE — Hero WebGL + FeaturedSection + GitHub Heatmap",
+    "/hardware":  "PAUSED — All code built, awaiting .glb model files from human",
+    "/software":  "DONE — Filter gallery, 3 projects, stats row",
+    "/links":     "DONE (scaffold) — 3 URLs still placeholder",
+    "/projects":  "STUB — route exists, no content"
+  },
+
+  "next_agent_directive": {
+    "agent": "Antigravity",
+    "action": "Priority queue: (1) Build /projects index page — list of all featured + software projects with links to case study stubs. (2) Build MDX case study template for src/app/projects/[slug]/page.tsx. (3) When human provides .glb files: activate HardwareScene in hardware/page.tsx by uncommenting the dynamic import. (4) When human fills in LinkedIn/YouTube URLs: deploy to Vercel."
+  },
+
+  "lighthouse_targets": {
+    "performance": "target 95+",
+    "accessibility": "target 100",
+    "seo": "target 100",
+    "best_practices": "target 100"
+  },
+
+  "dependencies_installed": [
+    "next@14+",
+    "framer-motion",
+    "@react-three/fiber",
+    "@react-three/drei",
+    "three",
+    "zustand",
+    "tailwindcss@3",
+    "geist",
+    "next/font (Inter, Space Grotesk)"
+  ]
 }

@@ -1,0 +1,29 @@
+export const metadata = {
+  title: 'API Saviour',
+}
+
+## The Edge Control Plane
+
+API Saviour is a production-grade AI API gateway sitting between internal applications and external LLM providers (OpenAI, Anthropic). It forces all outgoing LLM traffic through a strict gauntlet: PII scrubbers, budget enforcement, and telemetry tracking.
+
+### Why it exists
+When the organization hit 15 disparate LLM integrations across 4 teams, budget ballooned and data governance became invisible. We needed a choke point. The gateway was built to intercept, mutate, and instrument standard LLM HTTP payloads at the edge, before they hit the egress network.
+
+### Architecture
+The core is a fast-path proxy engine that streams responses. The slow-path is asynchronous, dropping telemetry into Redis and persisting to PostgreSQL.
+
+*   **Plugin Engine Runner:** Built a programmable request/response hook system allowing teams to deploy TS/JS middleware directly via an administrative UI.
+*   **Budgeting Layer:** Hard and soft quotas enforced per-key, with an emergency kill-switch (`BudgetController`).
+*   **Telemetry:** Structured logging to trace every request (cost, latency, tokens) and aggregate it into a dashboard.
+
+### The Plugin Marketplace
+
+Instead of hardcoding every possible requirement, I implemented an edge code editor and a plugin marketplace. Want to regex-mask SSNs before sending to Claude? Write a 5-line TS plugin. Want to rate-limit by user IP? Toggle the RateLimit plugin. This moved governance from code reviews to runtime policy.
+
+---
+
+> "API Saviour acts as our AI firewall. It gives us observability and cost control without slowing down the product teams."
+
+### Results
+*   **Reduced PII leaks** to zero via deterministic scrubbing.
+*   **Cut API costs by 24%** by caching identical requests via Redis before egress.

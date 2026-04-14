@@ -71,7 +71,7 @@ export const HeroWrapper: React.FC = () => {
           >
             {/* Eyebrow label */}
             <motion.p
-              className="font-mono text-cobalt-glow text-sm tracking-[0.3em] uppercase mb-6"
+              className="font-mono text-cobalt-glow text-sm tracking-wider mb-6"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
@@ -81,7 +81,7 @@ export const HeroWrapper: React.FC = () => {
                 delay: 0.1,
               }}
             >
-              ECE Engineer
+              Hi, I am Chaitanya Sangana
             </motion.p>
 
             {/* Primary heading — semantic H1, accessible */}

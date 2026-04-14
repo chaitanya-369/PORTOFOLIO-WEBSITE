@@ -73,3 +73,20 @@
   transform-origin: top center;
   animation: scrollPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* ============================================================
+   NAVBAR ENTER — One-shot slide-in on initial page load only.
+   By using a CSS animation (not framer motion on a persistent
+   component), we avoid the header re-animating on every
+   client-side route change.
+   ============================================================ */
+
+@keyframes navbarEnter {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+
+.navbar-enter {
+  animation: navbarEnter 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  /* "both" = hold final state; no flicker when animation ends */
+}
