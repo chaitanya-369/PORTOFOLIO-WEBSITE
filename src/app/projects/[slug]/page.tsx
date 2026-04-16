@@ -3,13 +3,17 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { allProjects } from '@/core/data/all-projects'
 import { CaseStudyClient } from '@/components/projects/CaseStudyClient'
+import { MDXRemote } from 'next-mdx-remote/rsc'
+import remarkGfm from 'remark-gfm'
+import rehypePrettyCode from 'rehype-pretty-code'
+import fs from 'fs'
+import path from 'path'
 
 // ─── STATIC PARAMS ───────────────────────────────────────────────────────────
 // Pre-renders only slugs that have actual MDX content files.
 // Projects without content redirect to 404.
 
 const SLUGS_WITH_CONTENT = ['api-saviour', 'org-memory'] as const
-type KnownSlug = typeof SLUGS_WITH_CONTENT[number]
 
 export function generateStaticParams(): Array<{ slug: string }> {
   return SLUGS_WITH_CONTENT.map((slug) => ({ slug }))
@@ -42,20 +46,10 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
 
 // ─── DYNAMIC MDX LOADER ──────────────────────────────────────────────────────
 
-const MDX_COMPONENTS: Record<string, () => Promise<{ default: React.FC }>> = {
-  'api-saviour': () => import('@/content/projects/api-saviour.mdx'),
-  'org-memory': () => import('@/content/projects/org-memory.mdx'),
-}
-
-async function loadCaseStudy(slug: string): Promise<React.FC | null> {
-  if (slug in MDX_COMPONENTS) {
-    try {
-      const mod = await MDX_COMPONENTS[slug]()
-      return mod.default
-    } catch (err) {
-      console.error(`Failed to load MDX for ${slug}`, err)
-      return null
-    }
+async function loadCaseStudy(slug: string): Promise<string | null> {
+  const filePath = path.join(process.cwd(), 'src/content/projects', `${slug}.mdx`)
+  if (fs.existsSync(filePath)) {
+    return fs.promises.readFile(filePath, 'utf8')
   }
   return null
 }
@@ -68,8 +62,8 @@ const ProjectPage = async ({ params }: ProjectPageProps): Promise<React.ReactEle
 
   if (!project) notFound()
 
-  const MDXContent = await loadCaseStudy(slug)
-  if (!MDXContent) notFound()
+  const source = await loadCaseStudy(slug)
+  if (!source) notFound()
 
   return (
     <main className="bg-obsidian-950 pt-22 pb-24">
@@ -125,7 +119,15 @@ const ProjectPage = async ({ params }: ProjectPageProps): Promise<React.ReactEle
 
       {/* ── MDX CONTENT ───────────────────────────────────────────────────── */}
       <CaseStudyClient>
-        <MDXContent />
+        <MDXRemote 
+          source={source} 
+          options={{
+            mdxOptions: {
+              remarkPlugins: [remarkGfm],
+              rehypePlugins: [[rehypePrettyCode, { theme: 'github-dark-dimmed', keepBackground: false }]],
+            }
+          }} 
+        />
       </CaseStudyClient>
     </main>
   )

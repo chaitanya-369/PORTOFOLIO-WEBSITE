@@ -15,7 +15,7 @@
  */
 
 import { motion } from 'framer-motion'
-import Link from 'next/link'
+
 
 // ─── SPRING CONFIGS ──────────────────────────────────────────────────────────
 
@@ -57,7 +57,7 @@ const LINKS: readonly BioLink[] = [
     id: 'linkedin',
     label: 'LinkedIn',
     sublabel: 'Professional profile & work experience',
-    href: 'https://linkedin.com/in/[PLACEHOLDER]', // TODO: Add your LinkedIn handle
+    href: 'https://linkedin.com/in/chaitanya-sangana',
     icon: <LinkedInIcon />,
     isPrimary: false,
     isExternal: true,
@@ -66,7 +66,7 @@ const LINKS: readonly BioLink[] = [
     id: 'youtube',
     label: 'YouTube',
     sublabel: 'Engineering build logs & technical deep-dives',
-    href: 'https://youtube.com/@[PLACEHOLDER]', // TODO: Add your YouTube channel handle
+    href: 'https://youtube.com/@chaitanya-sangana',
     icon: <YouTubeIcon />,
     isPrimary: false,
     isExternal: true,
@@ -75,7 +75,7 @@ const LINKS: readonly BioLink[] = [
     id: 'email',
     label: 'Email',
     sublabel: 'Open to internships & collaborations',
-    href: 'mailto:[PLACEHOLDER]@gmail.com', // TODO: Add your email address
+    href: 'mailto:chaitanya.sangana@gmail.com',
     icon: <EmailIcon />,
     isPrimary: false,
     isExternal: false,

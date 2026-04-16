@@ -13,7 +13,7 @@ export const HardwareSidebar: React.FC = () => {
   const selectedComponent = mockHardwareProject.components.find(c => c.id === selectedId)
   
   // Constitution Law 1: Heavy springs
-  const sidebarSpring = { type: 'spring', stiffness: 300, damping: 35, mass: 1 }
+  const sidebarSpring = { type: 'spring' as const, stiffness: 300, damping: 35, mass: 1 }
 
   return (
     <AnimatePresence>

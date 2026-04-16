@@ -177,7 +177,7 @@ export const ContributionHeatmap: React.FC<ContributionHeatmapProps> = ({ data }
                 >
                   {data.weeks.map((week, wi) => (
                     <div key={wi} className="flex flex-col gap-[2px]" role="row">
-                      {week.days.map((day, di) => (
+                      {week.days.map((day) => (
                         <HeatCell
                           key={day.date}
                           day={day}
