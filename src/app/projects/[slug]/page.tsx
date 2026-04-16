@@ -8,6 +8,7 @@ import remarkGfm from 'remark-gfm'
 import rehypePrettyCode from 'rehype-pretty-code'
 import fs from 'fs'
 import path from 'path'
+import { Mermaid } from '@/components/mdx/Mermaid'
 
 // ─── STATIC PARAMS ───────────────────────────────────────────────────────────
 // Pre-renders only slugs that have actual MDX content files.
@@ -121,6 +122,33 @@ const ProjectPage = async ({ params }: ProjectPageProps): Promise<React.ReactEle
       <CaseStudyClient>
         <MDXRemote 
           source={source} 
+          components={{
+            pre: (props: any) => {
+              const codeComponent = props.children
+              // Detect language from data-language (rehype-pretty-code) or className (standard)
+              const language = codeComponent?.props?.['data-language'] || codeComponent?.props?.className || ''
+              
+              if (language.includes('mermaid')) {
+                // If rehype-pretty-code processed it, the chart might be deep in nested spans
+                // We need the raw text. Let's try to extract it.
+                let chart = ''
+                
+                const extractText = (node: any): string => {
+                  if (typeof node === 'string') return node
+                  if (Array.isArray(node)) return node.map(extractText).join('')
+                  if (node?.props?.children) return extractText(node.props.children)
+                  return ''
+                }
+
+                chart = extractText(codeComponent?.props?.children)
+                
+                if (chart) {
+                  return <Mermaid chart={chart} />
+                }
+              }
+              return <pre {...props} />
+            }
+          }}
           options={{
             mdxOptions: {
               remarkPlugins: [remarkGfm],

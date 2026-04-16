@@ -1,60 +1,185 @@
 ## The Edge Control Plane
 
-API Saviour is a production-grade AI API gateway designed to act as an un-bypassable control plane sitting between internal enterprise applications and external LLM providers (e.g., OpenAI, Anthropic, Google). 
+API Saviour is a production-grade AI API gateway designed to act as an **un-bypassable control plane** sitting between internal enterprise applications and external LLM providers (e.g., OpenAI, Anthropic, Google). 
 
-As we scaled, traffic hit a critical mass: 15 completely disconnected AI integrations across 4 separate teams. Without centralized governance, the cloud compute budget ballooned unpredictably, and PII management became a "blind trust" scenario. The solution wasn't to slow down the teams, but to build a choke point that forces all outgoing LLM traffic through a strict gauntlet.
+As we scaled, traffic hit a critical mass: 15 completely disconnected AI integrations across 4 separate teams. Without centralized governance, the cloud compute budget ballooned unpredictably, and PII management became a "blind trust" scenario. The solution wasn't to slow down the teams, but to build a **choke point** that forces all outgoing LLM traffic through a strict architectural gauntlet.
 
-### Core Architecture
+---
 
-The system is fundamentally bifurcated into two pathways to ensure near-zero added latency on token generation:
+### High-Level Architecture
 
-1. **The Fast-Path Proxy Engine:** Written in TypeScript and deployed on edge infrastructure, this layer proxies the socket streams directly to the LLMs.
-2. **The Slow-Path Telemetry:** Asynchronous background workers pull event logs from the proxy stream, drop them into a Redis buffer ring, and batch-persist them to PostgreSQL.
+The system is split into a high-performance **Data Plane** (the edge gateway) and a feature-rich **Control Plane** (the admin console). This separation ensures that management overhead never impacts the latency of the token generation hot-path.
 
-This bifurcation ensures that even if our telemetry database suffers an outage, the proxy network continues to route traffic uninterrupted.
+```mermaid
+flowchart TD
+    %% Global Styling
+    classDef plain fill:#fff,stroke:#333,stroke-width:1px
+    classDef gateway fill:#f9f,stroke:#333,stroke-width:2px,color:#000
+    classDef admin fill:#bbf,stroke:#333,stroke-width:2px,color:#000
+    classDef storage fill:#dfd,stroke:#333,stroke-width:1px,color:#000
+    classDef external fill:#eee,stroke:#333,stroke-dasharray: 5 5,color:#000
+    classDef logic fill:#fff,stroke:#f66,stroke-width:2px,color:#000
 
-### Programmable Plugin Engine
+    subgraph "Clients Layer"
+        C1["App Frontend"]
+        C2["Backend Service"]
+        C3["AI Agent"]
+    end
 
-Instead of hardcoding every possible requirement, I implemented an edge-level code editor and a plugin marketplace. 
+    subgraph "Data Plane (Edge Gateway)"
+        direction TB
+        GW["Fastify Entry Point\n(/v1/chat/completions)"]
+        
+        subgraph "Request Middleware Pipeline"
+            Auth["Auth & Policy Filter\n(API Key validation)"]
+            Canon["Request Canonicalizer\n(OpenAI Spec Normalization)"]
+            Budget["Budget Controller\n(Quota/Limit check)"]
+            Scrub["PII Scrubber\n(Redaction Logic)"]
+        end
+
+        subgraph "Routing Logic Engine"
+            direction TB
+            Intent["Semantic Intent Engine\n(Classification)"]
+            Score["Scoring Algorithm\n(Quality - Cost - Latency)"]
+            Cache["Cache Manager\n(Exact & Semantic Cache)"]
+            Ladder["Fallback Ladder\n(Retry/Failover Matrix)"]
+            Circuit["Circuit Breaker\n(Health Tracking)"]
+        end
+
+        Adapters["Provider Adapters\n(OpenAI, Anthropic, Ollama, Mock)"]
+    end
+
+    subgraph "Persistence & Infrastructure"
+        Redis[("Redis (Hot Path Store)\n- Key Cache\n- Circuit State\n- Budget Counters")]
+        Postgres[("Postgres (Cold Path)\n- Policies\n- Registry\n- Audit Logs")]
+        Clickhouse[("Clickhouse (Telemetry)\n- Metrics Sink")]
+    end
+
+    subgraph "External AI Providers"
+        OpenAI(["OpenAI API"])
+        Anthropic(["Anthropic API"])
+        Ollama(["Local Ollama"])
+    end
+
+    %% Connections
+    C1 & C2 & C3 --> GW
+    GW --> Auth --> Canon --> Budget --> Scrub --> Intent
+    Intent --> Score --> Cache
+    Cache -- "Miss" --> Ladder --> Circuit --> Adapters
+    Adapters --> OpenAI & Anthropic & Ollama
+
+    %% Storage Links
+    Auth -.-> Redis
+    Budget -.-> Redis
+    Cache -.-> Redis
+    Circuit -.-> Redis
+    Adapters -- "Async Telemetry" --> Clickhouse
+
+    class GW,Auth,Canon,Budget,Scrub,Intent,Score,Cache,Ladder,Circuit,Adapters gateway
+    class Redis,Postgres,Clickhouse storage
+    class OpenAI,Anthropic,Ollama external
+    class Intent,Score,Ladder,Circuit logic
+```
+
+---
+
+### The Request Lifecycle
+
+Every request is normalized into a `RequestHash` which serves as a canonical fingerprint for caching and budget enforcement. The following sequence traces a request as it traverses the data plane.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant GW as Gateway (Fastify)
+    participant Redis
+    participant Router as Routing Engine
+    participant Multi as Multi-Provider Ladder
+    participant Provider as AI Provider (e.g. Anthropic)
+    participant Telemetry as Telemetry Sink (Clickhouse)
+
+    Note over Client, GW: Integrated via OpenAI SDK
+    Client->>+GW: POST /v1/chat/completions
+    
+    rect rgb(30, 30, 40)
+        Note right of GW: Middleware Phase
+        GW->>Redis: Get Key Metadata (Hash)
+        Redis-->>GW: Key Validated (Tenant X)
+        GW->>GW: Canonicalize Payload
+        GW->>Redis: Check Quota (Daily Spend)
+        Redis-->>GW: Budget OK
+        GW->>GW: PII Scrubbing
+    end
+
+    rect rgb(40, 30, 40)
+        Note right of GW: Routing Phase
+        GW->>Router: Score Models (Cost vs Quality)
+        Router-->>GW: Candidate Ladder: [Claude 3.5, GPT-4o]
+        GW->>Redis: Check Prompt Cache (Exact Hash)
+        
+        alt Cache Hit
+            Redis-->>GW: Cached Response
+            GW-->>Client: 200 OK (Instant)
+        else Cache Miss
+            Redis-->>GW: Miss
+            GW->>Multi: Execute ladder[0] (Claude 3.5)
+            
+            alt Primary Provider Success
+                Multi->>Provider: Stream Request
+                Provider-->>Multi: SSE Chunks
+                Multi-->>GW: Stream Proxy
+                GW-->>Client: SSE Stream
+            else Primary Provider 5xx/429
+                Note over Multi, Provider: Circuit Breaker Open
+                Multi->>Multi: Trigger Fallback [1] (GPT-4o)
+                Multi->>Provider: Stream Request (GPT-4o)
+                Provider-->>GW: SSE Chunks
+                GW-->>Client: SSE Stream
+            end
+        end
+    end
+
+    rect rgb(30, 40, 30)
+        Note right of GW: Post-request Phase
+        GW-)Telemetry: Emit Usage Metrics (Async)
+        GW-)Redis: Write Cache & Increment Spend (Async)
+    end
+    
+    deactivate GW
+```
+
+---
+
+### Core Engineering Decisions
+
+#### 1. Fast-Path / Slow-Path Bifurcation
+To ensure near-zero added latency on token generation, I implemented a strict bifurcation:
+- **Fast-Path Proxy:** A lightweight TypeScript engine that proxies socket streams directly to LLMs.
+- **Slow-Path Telemetry:** Asynchronous background workers that pull event logs from a Redis buffer and batch-persist them to Clickhouse.
+
+#### 2. Programmable Plugin Engine
+Instead of hardcoding policy requirements, I built an edge-level plugin layer that allows for real-time traffic manipulation without restarts.
 
 ```typescript
-// Example: A runtime PII scrubbing plugin written in TypeScript
-export const PIIScrubberPlugin: EdgePlugin = {
-  id: 'pii-mask-v2',
-  priority: 10,
-  beforeEgress: async (req, ctx) => {
-    // Regex matches Social Security Numbers and Redacts them
-    const safePayload = req.body.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[REDACTED_SSN]');
-    return { ...req, body: safePayload };
+// Example: A production-grade PII scrubber pattern
+export const PIIScrubber: EdgeMiddleware = {
+  id: 'pii-redactor-v1',
+  order: 'pre-egress',
+  execute: async (request) => {
+    // Deterministic Token Redaction logic
+    const sanitizedBody = redactSensitiveInfo(request.body);
+    return { ...request, body: sanitizedBody };
   }
 }
 ```
 
-This effectively shifted governance out of the code-review phase and into a dedicated runtime policy layer. You can write a 5-line TypeScript plugin to regex-mask SSNs or implement a sophisticated sliding-window rate limit by user IP, and deploy it instantly across the network without a rolling restart.
+---
 
-### The Budget Controller
+### Outcomes & Impact
 
-```mermaid
-graph TD
-    A[Client Request] --> B{API Saviour}
-    B -->|Check Quota| C[(Redis Quota State)]
-    C -->|Quota Exceeded| D[Reject Request]
-    C -->|Quota OK| E[Execute Fast-Path Proxy]
-    E --> F((OpenAI / Anthropic))
-```
+By shifting governance into the runtime infrastructure layer, we achieved:
+- **24% Cost Reduction**: Via Redis-based semantic and exact prompt caching.
+- **Zero PII Leaks**: Automated redaction at the edge before data ever leaves the VPC.
+- **100% Observability**: Real-time cost and usage tracking aggregated by the Control Plane.
 
-The system implements Hard and Soft quotas enforced on a per-team API key basis. 
-
-*   **Soft Caps:** Trigger asynchronous Slack webhook alerts indicating a team has burned 80% of their daily allocation.
-*   **Hard Caps (Emergency Kill-Switch):** Instantly rejects the request at the edge with a `429 Too Many Requests` envelope.
-
-### Outcomes
-
-By decoupling the governance from the product teams, we achieved the following results within the first 30 days of deployment:
-
-*   **Reduced PII leaks to zero** using regex and deterministic token masking.
-*   **Cut overall API costs by 24%** by mapping identical queries through a Redis semantic cache before they hit the egress network.
-*   **Established 100% Observability:** Every token generated is traced, costed, and aggregated into a comprehensive admin telemetry dashboard.
-
-> [!NOTE]
-> API Saviour proves that robust security infrastructure does not need to compromise product iteration velocity. It acts as our AI firewall, providing safety guarantees entirely transparently to the calling application.
+> [!IMPORTANT]
+> API Saviour proves that **Security Infrastructure** can actually *increase* velocity by providing safety guarantees that work transparently for developers.
