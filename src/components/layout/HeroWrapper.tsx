@@ -81,9 +81,9 @@ export const HeroWrapper: React.FC = () => {
                 delay: 0.1,
               }}
             >
-              ECE Undergrad // AI-Native Builder
+              Hybrid Systems Engineer
             </motion.p>
-
+ 
             {/* Primary heading — semantic H1, accessible */}
             <motion.h1
               className="font-display text-hero text-white-pure text-center leading-[0.9] tracking-tight max-w-5xl px-8 uppercase"
@@ -99,7 +99,7 @@ export const HeroWrapper: React.FC = () => {
             >
               Integrated
               <br />
-              <span className="text-cobalt-glow font-bold">Systems</span> Architecture
+              <span className="text-cobalt-glow font-bold">Systems</span> Architect
             </motion.h1>
 
             {/* Subheading */}
