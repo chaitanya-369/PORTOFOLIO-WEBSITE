@@ -26,6 +26,8 @@ const nextConfig = {
   experimental: {
     // Optimizes CSS loading
     optimizeCss: true,
+    // Faster resolution + better tree-shaking for heavy packages
+    optimizePackageImports: ['framer-motion', '@react-three/drei', 'three', 'mermaid'],
   },
 }
 

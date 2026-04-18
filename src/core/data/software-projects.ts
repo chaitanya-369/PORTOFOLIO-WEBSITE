@@ -64,6 +64,19 @@ export const softwareProjects: readonly SoftwareProject[] = [
     year: 2026,
     status: 'wip',
   },
+  {
+    id: 'standard',
+    title: 'The Standard',
+    blurb: 'A definitive technical manifest for high-performance, type-safe, and deterministic systems design.',
+    longBlurb: 'A definitive manifest for high-performance, type-safe, and deterministic systems design. Featuring NixOS, Rust 2024, Next.js 15, and a full LGTM observability stack.',
+    category: 'infra',
+    categoryLabel: 'SPEC · PHILOSOPHY',
+    tags: ['Architecture', 'Philosophy', 'NixOS', 'Rust'],
+    href: '/standard',
+    isExternal: false,
+    year: 2026,
+    status: 'live',
+  },
 ]
 
 /** All unique categories that exist in the data, for filter generation */

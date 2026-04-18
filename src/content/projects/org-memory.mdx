@@ -37,6 +37,166 @@ function RRFScore(semanticRank: number, keywordRank: number, k = 60): number {
 
 Because this database contains sensitive, organization-wide architecture decisions, role-based access control (RBAC) was deeply integrated into the retrieval logic. A query first executes a filter over the PostgreSQL metadata layer to ensure the API key has reading rights to the matched Workspace, only pushing authorized chunks into the embedding similarity engine.
 
+### Technical Architecture
+
+This section provides a detailed technical visualization of the OrgMemory architecture, covering the data lifecycle from ingestion to retrieval, the hybrid identity model, and the core synthesis engine.
+
+#### 1. System Landscape
+The high-level interaction between clients, the Next.js application server, AI providers, and the Supabase vector store.
+
+```mermaid
+graph TB
+    subgraph "External Integration Layer"
+        Slack[Slack API/Webhooks]
+        GitHub[GitHub API/Webhooks]
+        Notion[Notion API]
+        Linear[Linear API]
+    end
+
+    subgraph "OrgMemory App (Next.js)"
+        UI["Frontend UI (React 19)"]
+        
+        subgraph "API Routes"
+            QueryAPI["/api/query"]
+            WebhookAPI["/api/webhook/*"]
+            AuthAPI["/api/auth/*"]
+        end
+
+        subgraph "Core Services (Lib)"
+            Ingestion["Ingestion Engine"]
+            Identity["Identity Resolver"]
+            AI["AI Provider (OpenAI)"]
+        end
+    end
+
+    subgraph "Data & Memory Layer (Supabase)"
+        DB[(PostgreSQL)]
+        VectorStore[(pgvector)]
+        Cache[(JSONB Cache)]
+    end
+
+    %% Interactions
+    Slack -->|Events| WebhookAPI
+    GitHub -->|Events| WebhookAPI
+    UI -->|Query| QueryAPI
+    
+    WebhookAPI --> Ingestion
+    Ingestion --> Identity
+    Ingestion --> AI
+    Ingestion --> VectorStore
+    
+    QueryAPI --> AI
+    QueryAPI --> VectorStore
+    QueryAPI --> Cache
+```
+
+#### 2. Ingestion Pipeline
+How raw communication fragments are transformed into durable, searchable memory nodes.
+
+```mermaid
+sequenceDiagram
+    participant Source as External Source (Slack/GH)
+    participant Lib as Ingestion Lib
+    participant ID as Identity Graph
+    participant AI as OpenAI (embeddings)
+    participant DB as Supabase (pgvector)
+
+    Source->>Lib: Raw Event Data
+    Lib->>Lib: Content Cleaning (strip md, code blocks)
+    Note over Lib: cleanSlackText()
+    
+    Lib->>ID: resolveIdentity(provider_user_id)
+    alt Cached Identity
+        ID-->>Lib: global_user_id
+    else New Identity
+        ID->>Source: Fetch Profile details
+        ID->>ID: Create global_user_id
+        ID-->>Lib: global_user_id
+    end
+
+    Lib->>AI: embedText(cleaned_content)
+    AI-->>Lib: 1536d Float Array
+
+    Lib->>DB: upsertMemoryNode()
+    Note over DB: Index: source + source_id
+    DB-->>Lib: Success (Node UUID)
+```
+
+#### 3. Query & Synthesis Engine
+The flow of a natural language question through the retrieval-augmented generation (RAG) pipeline.
+
+```mermaid
+flowchart TD
+    User([User Question]) --> Hash[SHA-256 Query Hash]
+    
+    Hash --> CheckCache{Check Cache?}
+    CheckCache -- "Hit" --> ReturnCache[Stream Cached Answer]
+    CheckCache -- "Miss" --> Embed[Generate Query Embedding]
+    
+    Embed --> VectorSearch[RPC: search_memory]
+    
+    subgraph "Supabase Vector Logic"
+        VectorSearch --> Cosine[Cosine Similarity]
+        Cosine --> TimeDecay[Apply Exponential Time Decay]
+        TimeDecay --> Rank[Rank & Filter Top K]
+    end
+    
+    Rank --> Sort[Chronological Sorting]
+    Sort --> Prompt[Construct Synthesis Prompt]
+    
+    Prompt --> LLM[OpenAI GPT-4o]
+    
+    LLM --> Stream["Stream Answer (Server-Sent Events)"]
+    Stream --> Finalize[Append Citation Metadata]
+    Finalize --> WriteCache[Update query_cache]
+    
+    ReturnCache --> UI([UI Presentation])
+    Finalize --> UI
+```
+
+#### 4. Identity & Memory Schema
+The relationship between users across different platforms and their generated memory fragments.
+
+```mermaid
+erDiagram
+    organizations ||--o{ memory_nodes : "owns"
+    organizations ||--o{ identity_graph : "manages"
+    
+    identity_graph {
+        uuid global_user_id PK
+        string email
+        string slack_user_id
+        string github_username
+        string linear_user_id
+        string slack_display_name
+        string avatar_url
+    }
+
+    memory_nodes {
+        uuid id PK
+        uuid organization_id FK
+        string source "slack | github | linear"
+        string source_id "idempotency key"
+        string content "cleaned text"
+        vector embedding "1536 dims"
+        jsonb metadata "channel, thread, repo"
+        uuid author_global_id FK
+        timestamp created_at
+    }
+
+    identity_graph ||--o{ memory_nodes : "authored"
+```
+
+#### Architectural Maturity Labels
+
+| Component | Status | Tech Stack |
+| :--- | :--- | :--- |
+| **Slack Ingestion** | ✅ Production Ready | Webhooks + History API |
+| **Query Engine** | ✅ Internal Beta | GPT-4o + text-embedding-3-small |
+| **Identity Graph** | 🟡 Partial | Slack-to-Email matching active |
+| **GitHub/Linear** | ⚪ Scaffolded | Webhook handlers present, config pending |
+| **Multi-tenancy** | ⚪ Placeholder | Organization IDs implemented, Auth pending |
+
 ### Impact on Scale
 
 > [!IMPORTANT]  

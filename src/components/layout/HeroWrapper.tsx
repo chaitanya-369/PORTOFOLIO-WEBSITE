@@ -71,7 +71,7 @@ export const HeroWrapper: React.FC = () => {
           >
             {/* Eyebrow label */}
             <motion.p
-              className="font-mono text-cobalt-glow text-sm tracking-wider mb-6"
+              className="font-mono text-cobalt-glow text-[10px] sm:text-xs tracking-[0.4em] mb-6 uppercase"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
@@ -81,12 +81,12 @@ export const HeroWrapper: React.FC = () => {
                 delay: 0.1,
               }}
             >
-              Hi, I am Chaitanya Sangana
+              ECE Undergrad // AI-Native Builder
             </motion.p>
 
             {/* Primary heading — semantic H1, accessible */}
             <motion.h1
-              className="font-display text-hero text-white-pure text-center leading-none tracking-tight max-w-4xl px-8"
+              className="font-display text-hero text-white-pure text-center leading-[0.9] tracking-tight max-w-5xl px-8 uppercase"
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
@@ -97,14 +97,14 @@ export const HeroWrapper: React.FC = () => {
                 delay: 0.2,
               }}
             >
-              Hardware
+              Integrated
               <br />
-              <span className="text-cobalt-glow">Engineer</span>
+              <span className="text-cobalt-glow font-bold">Systems</span> Architecture
             </motion.h1>
 
             {/* Subheading */}
             <motion.p
-              className="font-body text-h3 text-white-muted text-center mt-6 max-w-xl px-8"
+              className="font-body text-base md:text-h3 text-white-muted text-center mt-8 max-w-2xl px-8 leading-relaxed font-light"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
@@ -114,12 +114,13 @@ export const HeroWrapper: React.FC = () => {
                 delay: 0.35,
               }}
             >
-              PCB Design · VLSI · Embedded Systems · Robotics
+              Scaling the intersection of <span className="text-white-pure font-medium">Bits & Atoms</span>.<br className="hidden md:block" />
+              AI Orchestration · Software Infra · Embedded Systems · VLSI · PCB Design
             </motion.p>
 
             {/* CTA row — pointer-events-auto re-enabled here only */}
             <motion.div
-              className="flex gap-4 mt-10 pointer-events-auto"
+              className="flex flex-col sm:flex-row gap-4 mt-12 pointer-events-auto w-full max-w-md px-8"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
@@ -129,10 +130,10 @@ export const HeroWrapper: React.FC = () => {
                 delay: 0.5,
               }}
             >
-              {/* Primary CTA */}
+              {/* Software CTA — Primary Action */}
               <motion.a
-                href="/hardware"
-                className="px-6 py-3 bg-cobalt-accent text-white-pure font-body font-medium text-sm tracking-wide border border-cobalt-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-glow focus-visible:ring-offset-2 focus-visible:ring-offset-obsidian-950"
+                href="/software"
+                className="flex-1 px-6 py-4 bg-cobalt-accent text-white-pure font-mono font-bold text-[10px] tracking-[0.2em] uppercase text-center border border-cobalt-accent shadow-[0_0_20px_rgba(37,99,235,0.2)]"
                 whileHover={{
                   scale: 1.02,
                   backgroundColor: '#1D4ED8',
@@ -143,18 +144,16 @@ export const HeroWrapper: React.FC = () => {
                   transition: { type: 'spring', stiffness: 600, damping: 40 },
                 }}
               >
-                View Hardware
+                View Software
               </motion.a>
 
-              {/* Secondary CTA */}
+              {/* Hardware CTA — Secondary Action */}
               <motion.a
-                href="https://github.com/chaitanya-369"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-3 bg-transparent text-white-muted font-body font-medium text-sm tracking-wide border border-obsidian-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cobalt-glow focus-visible:ring-offset-2 focus-visible:ring-offset-obsidian-950"
+                href="/hardware"
+                className="flex-1 px-6 py-4 bg-transparent text-white-pure font-mono font-bold text-[10px] tracking-[0.2em] uppercase text-center border border-white/10 hover:border-white/30 transition-colors"
                 whileHover={{
-                  borderColor: '#2563EB',
-                  color: '#FFFFFF',
+                  scale: 1.02,
+                  backgroundColor: 'rgba(255,255,255,0.05)',
                   transition: { type: 'spring', stiffness: 600, damping: 40 },
                 }}
                 whileTap={{
@@ -162,7 +161,7 @@ export const HeroWrapper: React.FC = () => {
                   transition: { type: 'spring', stiffness: 600, damping: 40 },
                 }}
               >
-                GitHub ↗
+                Explore Hardware
               </motion.a>
             </motion.div>
           </motion.div>

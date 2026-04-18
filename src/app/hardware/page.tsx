@@ -1,17 +1,21 @@
-import type { Metadata } from 'next'
+'use client'
 
+import dynamic from 'next/dynamic'
 import { mockHardwareProject } from '@/core/data/hardware-mock'
 import { LoadingOverlay } from '@/components/hardware/LoadingOverlay'
 import { HardwareSidebar } from '@/components/hardware/HardwareSidebar'
+import { HardwareControls } from '@/components/hardware/HardwareControls'
+import { DormancyOverlay } from '@/components/hardware/DormancyOverlay'
+import { useAppStore } from '@/core/store'
 
-export const metadata: Metadata = {
-  title: 'Hardware Explorer',
-  description: 'Interactive 3D models of ECE hardware projects.',
-}
-
-import { HardwareScene } from '@/glsl/scenes/HardwareScene'
+const HardwareScene = dynamic(
+  () => import('@/glsl/scenes/HardwareScene').then(mod => mod.HardwareScene),
+  { ssr: false }
+)
 
 const HardwarePage = () => {
+  const isPaused = useAppStore(s => s.isPaused)
+
   return (
     <main className="relative w-screen h-screen bg-obsidian-950 overflow-hidden pt-22 flex flex-col items-center justify-center">
       {/* ── 3D RENDERING LAYER (GPU) ── */}
@@ -20,6 +24,8 @@ const HardwarePage = () => {
       </div>
 
       {/* ── DOM OVERLAY LAYER (UI) ── */}
+      <DormancyOverlay />
+      {!isPaused && <HardwareControls />}
       <LoadingOverlay />
       <HardwareSidebar />
 

@@ -1,0 +1,78 @@
+---
+title: "Engineering Standard"
+subtitle: "v2026.1 // Integrated Logic & System Architecture"
+description: "A technical specification for high-performance, type-safe, and deterministic software engineering."
+category: "Philosophy"
+date: "2026-04-18"
+---
+
+# 🌌 Engineering Standard
+
+This document outlines the technical philosophy and architectural standards I apply to every system I build. It is engineered to enforce mathematical correctness, operational excellence, and rapid scalability.
+
+> [!IMPORTANT]
+> My workflow is built on **Declarative Design**. By enforcing strict types and deterministic configurations, I create systems that are resilient to error and optimized for automated verification.
+
+---
+
+## 🏛️ Technical Philosophy
+
+Building complex systems requires more than just code; it requires a rigid structural framework. My approach is centered on three core principles:
+
+### 01 / Unified System Scaffold
+I maintain a high-fidelity foundation for every project. This includes pre-integrated modules for Identity (Auth0/Lucia), Financials (Stripe), and Observability (LGTM Stack). This modularity allows me to focus on unique business logic from minute zero.
+
+### 02 / Atomic Focus
+I prioritize solving core architectural problems with high-leverage features. By focusing on modularity and atomic service design, I ensure that every component is independent, testable, and ready for horizontal scaling.
+
+### 03 / Declarative Engineering
+Design precedes implementation. I follow a strict **Type-First** and **Spec-Driven** development cycle. This ensures that the system's state is always predictable and that the "Red-Green-Refactor" loop is mathematically sound.
+
+---
+
+## 🏗️ Deterministic Infrastructure
+
+The foundation ensures that environment drift is eliminated. I leverage **NixOS** and cloud-native orchestration for absolute reproducibility.
+
+*   **Runtime Environment:** NixOS 25.11 (Xantusia). All packages and system configurations are cryptographically hashed.
+*   **Virtualization:** Podman v5.0+. Daemon-less and rootless for a superior security posture.
+*   **Orchestration:** Managed Kubernetes with **Karpenter** for just-in-time compute provisioning on dedicated ARM64 nodes.
+*   **Compute Silicon:** AWS Graviton4. High-performance ARM64 architecture optimized for modern concurrent workloads.
+
+---
+
+## ⚙️ The Compiler Stack
+
+I prioritize **Compile-Time Safety** over runtime checking. Proactive error detection is built into the language choices.
+
+### Systems & Logic: Rust 2024
+The primary engine for performance-critical systems. Powered by **Tokio**'s multi-threaded event loop and **Serde** for zero-copy serialization. I use the **mold** linker to minimize build latency.
+
+### Web Intelligence: TypeScript v5.6+
+Enforced with maximum strictness: `ExactOptionalPropertyTypes` and `NoImplicitReturns`. I utilize **Valibot** for runtime schema validation at every network boundary.
+
+### Data & AI: Python 3.13
+Utilizing free-threading support for improved parallelism. Managed via **uv** for high-speed package orchestration and **PyTorch** for integrated AI workflows.
+
+---
+
+## 🎨 Interface Engineering
+
+My frontend standard focuses on **Instant Interaction** and high-fidelity aesthetics.
+
+*   **Next.js 15 (App Router):** Leveraging **React Server Components (RSC)** to offload logic and minimize browser-side JavaScript.
+*   **Tailwind CSS v4.0:** A purely CSS-variable driven design system with zero runtime overhead.
+*   **State Control:** **Zustand** for functional, persistent state management.
+*   **Desktop Layer:** **Tauri v2**. Rust-powered systems logic paired with modern web interfaces for lightweight, secure desktop applications.
+
+---
+
+## 🛡️ Distributed Systems & Security
+
+Engineered for **Low-Latency** communication and **Type-Safe** telemetry.
+
+*   **Web Engine:** Axum v0.8.x. A macro-free, type-safe routing system built on `tower`.
+*   **Communication:** Internal **gRPC** (ProtoBuf v3) for strict service contracts + **GraphQL** for client-facing data.
+*   **Message Layer:** **Redpanda v26.x**. A C++ Kafka alternative for sub-millisecond event streaming.
+*   **Database:** PostgreSQL 17 with `pgvector` for embedding storage and **Atlas** for declarative schema management.
+*   **Observability:** Full LGTM Stack (Prometheus, Grafana, Loki, Tempo) with unified Trace IDs.

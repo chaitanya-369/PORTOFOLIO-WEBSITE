@@ -22,7 +22,16 @@ export const HardwareModel: React.FC<HardwareModelProps> = ({ project }) => {
   const setLoadState = useAppStore(s => s.setLoadState)
   
   // Simulate heavy model loading via Zustand state so the UI LoadingOverlay can render
+  const isPaused = useAppStore(s => s.isPaused)
+
   useEffect(() => {
+    if (isPaused) {
+      // If paused, we don't want to show a loading screen that never ends
+      // or consumes resources for no reason.
+      setLoadState({ isLoading: false, progress: 0, error: null })
+      return
+    }
+
     setLoadState({ isLoading: true, progress: 0, error: null })
     let progress = 0
     const interval = setInterval(() => {
@@ -35,13 +44,13 @@ export const HardwareModel: React.FC<HardwareModelProps> = ({ project }) => {
       }
     }, 150)
     return () => clearInterval(interval)
-  }, [setLoadState])
+  }, [setLoadState, isPaused])
 
   // Float animation using R3F useFrame (Zero React overhead)
+
   useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.position.y = Math.sin(state.clock.elapsedTime) * 0.1
-    }
+    if (isPaused || !meshRef.current) return
+    meshRef.current.position.y = Math.sin(state.clock.elapsedTime) * 0.1
   })
 
   return (

@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import mermaid from 'mermaid'
 
 /**
  * Mermaid — Client-side SVG Generator for Diagrams
@@ -14,22 +13,6 @@ import mermaid from 'mermaid'
 interface MermaidProps {
   readonly chart: string
 }
-
-// Initialize Mermaid with a premium dark theme to match the portfolio
-mermaid.initialize({
-  startOnLoad: false,
-  theme: 'dark',
-  themeVariables: {
-    fontFamily: 'var(--font-geist-mono)',
-    primaryColor: '#0055FF',
-    primaryTextColor: '#fff',
-    primaryBorderColor: '#0055FF',
-    lineColor: '#52525B',
-    secondaryColor: '#27272A',
-    tertiaryColor: '#18181B',
-  },
-  securityLevel: 'loose',
-})
 
 export const Mermaid: React.FC<MermaidProps> = ({ chart }) => {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -47,6 +30,25 @@ export const Mermaid: React.FC<MermaidProps> = ({ chart }) => {
 
       try {
         setError(null)
+        
+        // Dynamic import to keep large mermaid bundle out of initial page load
+        const { default: mermaid } = await import('mermaid')
+
+        // Initialize with premium dark theme
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: 'dark',
+          themeVariables: {
+            fontFamily: 'var(--font-geist-mono)',
+            primaryColor: '#0055FF',
+            primaryTextColor: '#fff',
+            primaryBorderColor: '#0055FF',
+            lineColor: '#52525B',
+            secondaryColor: '#27272A',
+            tertiaryColor: '#18181B',
+          },
+          securityLevel: 'loose',
+        })
         
         // Render the diagram to SVG string
         const { svg: renderedSvg } = await mermaid.render(id.current, chart)

@@ -5,14 +5,15 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 // Raw hex values — Framer Motion cannot interpolate CSS custom properties (var(--…))
-const COLOR_ACTIVE  = '#FFFFFF'   // --color-white-pure
-const COLOR_MUTED   = '#A1A1AA'   // --color-white-muted
+const COLOR_ACTIVE = '#FFFFFF'   // --color-white-pure
+const COLOR_MUTED = '#A1A1AA'   // --color-white-muted
 
 const navLinks = [
-  { name: 'Hardware', path: '/hardware' },
   { name: 'Software', path: '/software' },
+  { name: 'Hardware', path: '/hardware' },
+  { name: 'Standard', path: '/standard' },
   { name: 'Projects', path: '/projects' },
-  { name: 'Links',    path: '/links'    },
+  { name: 'Links', path: '/links' },
 ]
 
 export const Navbar: React.FC = () => {

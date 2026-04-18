@@ -9,6 +9,8 @@ import rehypePrettyCode from 'rehype-pretty-code'
 import fs from 'fs'
 import path from 'path'
 import { Mermaid } from '@/components/mdx/Mermaid'
+import { ProjectCockpit } from '@/components/projects/ProjectCockpit'
+
 
 // ─── STATIC PARAMS ───────────────────────────────────────────────────────────
 // Pre-renders only slugs that have actual MDX content files.
@@ -66,6 +68,89 @@ const ProjectPage = async ({ params }: ProjectPageProps): Promise<React.ReactEle
   const source = await loadCaseStudy(slug)
   if (!source) notFound()
 
+  // ─── MDX SECTION SPLITTING ────────────────────────────────────────────────
+  // We split the MDX source by H2/H3 headings to create discrete "branches".
+  // This allows the Cockpit UI to switch between logical chunks of information.
+  
+  const sections: Array<{ id: string; label: string; raw: string }> = []
+  
+  // Basic split logic: look for ## or ### headings
+  const parts = source.split(/(?=^#{2,3}\s)/m)
+  
+  // The first part might be lead-in text (Overview)
+  if (parts.length > 0 && !parts[0].startsWith('#')) {
+    sections.push({ id: 'overview', label: 'Overview', raw: parts[0] })
+    parts.shift()
+  }
+
+  // Map the rest to logical branches
+  parts.forEach((part, index) => {
+    const headingMatch = part.match(/^#{2,3}\s+(.+)$/m)
+    const title = headingMatch ? headingMatch[1].trim() : `Section ${index + 1}`
+    
+    // Group them into semantic IDs
+    let id = title.toLowerCase().replace(/[^\w]/g, '-')
+    let label = title
+
+    // Consolidate categories
+    const lowerLabel = label.toLowerCase()
+    if (lowerLabel.includes('architecture') || lowerLabel.includes('lifecycle') || lowerLabel.includes('landscape') || lowerLabel.includes('diagram')) {
+      id = 'architecture'
+      label = 'Architecture'
+    } else if (
+      lowerLabel.includes('engineering') || 
+      lowerLabel.includes('technical') || 
+      lowerLabel.includes('protocol') || 
+      lowerLabel.includes('implementation') || 
+      lowerLabel.includes('security') ||
+      lowerLabel.includes('decisions')
+    ) {
+      id = 'engineering'
+      label = 'Engineering'
+    } else if (lowerLabel.includes('outcome') || lowerLabel.includes('impact') || lowerLabel.includes('results') || lowerLabel.includes('scale')) {
+      id = 'outcomes'
+      label = 'Outcomes'
+    }
+
+
+    // Merge content if ID already exists
+    const existing = sections.find(s => s.id === id)
+    if (existing) {
+      existing.raw += `\n\n${part}`
+    } else {
+      sections.push({ id, label, raw: part })
+    }
+  })
+
+  // ─── MDX COMPONENTS ───────────────────────────────────────────────────────
+  
+  const mdxComponents = {
+    pre: (props: any) => {
+      const codeComponent = props.children
+      const language = codeComponent?.props?.['data-language'] || codeComponent?.props?.className || ''
+      
+      if (language.includes('mermaid')) {
+        let chart = ''
+        const extractText = (node: any): string => {
+          if (typeof node === 'string') return node
+          if (Array.isArray(node)) return node.map(extractText).join('')
+          if (node?.props?.children) return extractText(node.props.children)
+          return ''
+        }
+        chart = extractText(codeComponent?.props?.children)
+        if (chart) return <Mermaid chart={chart} />
+      }
+      return <pre {...props} />
+    }
+  }
+
+  const mdxOptions = {
+    mdxOptions: {
+      remarkPlugins: [remarkGfm],
+      rehypePlugins: [[rehypePrettyCode, { theme: 'github-dark-dimmed', keepBackground: false }]],
+    }
+  }
+
   return (
     <main className="bg-obsidian-950 pt-22 pb-24">
       {/* ── BACK NAVIGATION ───────────────────────────────────────────────── */}
@@ -78,87 +163,39 @@ const ProjectPage = async ({ params }: ProjectPageProps): Promise<React.ReactEle
         </Link>
       </div>
 
-      {/* ── CASE STUDY HEADER ─────────────────────────────────────────────── */}
-      <header className="max-w-4xl mx-auto px-8 mb-16">
-        {/* Category */}
+      {/* ── COCKPIT HEADER ────────────────────────────────────────────────── */}
+      <header className="max-w-4xl mx-auto px-8 mb-8 text-center sm:text-left">
         <p className="font-mono text-cobalt-glow text-xs tracking-widest uppercase mb-4">
           {project.categoryLabel}
         </p>
-
-        {/* Title */}
-        <h1 className="font-display text-h1 text-white-pure tracking-tight leading-tight mb-6">
+        <h1 className="font-display text-h1 text-white-pure tracking-tight leading-tight mb-4">
           {project.title}
         </h1>
-
-        {/* Blurb */}
-        <p className="font-body text-white-muted text-lg leading-relaxed max-w-2xl mb-8">
+        <p className="font-body text-white-muted text-base leading-relaxed max-w-2xl mx-auto sm:mx-0">
           {project.blurb}
         </p>
-
-        {/* Meta bar */}
-        <div className="flex flex-wrap gap-x-8 gap-y-3 pt-6 border-t border-obsidian-800">
-          <div className="flex flex-col gap-1">
-            <span className="font-mono text-[9px] tracking-widest uppercase text-white-faint">Year</span>
-            <span className="font-mono text-sm text-white-pure">{project.year}</span>
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="font-mono text-[9px] tracking-widest uppercase text-white-faint">Domain</span>
-            <span className="font-mono text-sm text-white-pure capitalize">{project.domain}</span>
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="font-mono text-[9px] tracking-widest uppercase text-white-faint">Stack</span>
-            <div className="flex flex-wrap gap-1.5">
-              {project.tags.map((tag) => (
-                <span key={tag} className="font-mono text-[10px] text-cobalt-glow border border-cobalt-accent/30 bg-cobalt-accent/5 px-2 py-0.5">
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
       </header>
 
-      {/* ── MDX CONTENT ───────────────────────────────────────────────────── */}
-      <CaseStudyClient>
-        <MDXRemote 
-          source={source} 
-          components={{
-            pre: (props: any) => {
-              const codeComponent = props.children
-              // Detect language from data-language (rehype-pretty-code) or className (standard)
-              const language = codeComponent?.props?.['data-language'] || codeComponent?.props?.className || ''
-              
-              if (language.includes('mermaid')) {
-                // If rehype-pretty-code processed it, the chart might be deep in nested spans
-                // We need the raw text. Let's try to extract it.
-                let chart = ''
-                
-                const extractText = (node: any): string => {
-                  if (typeof node === 'string') return node
-                  if (Array.isArray(node)) return node.map(extractText).join('')
-                  if (node?.props?.children) return extractText(node.props.children)
-                  return ''
-                }
-
-                chart = extractText(codeComponent?.props?.children)
-                
-                if (chart) {
-                  return <Mermaid chart={chart} />
-                }
-              }
-              return <pre {...props} />
-            }
-          }}
-          options={{
-            mdxOptions: {
-              remarkPlugins: [remarkGfm],
-              rehypePlugins: [[rehypePrettyCode, { theme: 'github-dark-dimmed', keepBackground: false }]],
-            }
-          }} 
+      {/* ── BRANCHING PROJECT COCKPIT ────────────────────────────────────── */}
+      <div className="max-w-7xl mx-auto px-8">
+        <ProjectCockpit 
+          title={project.id === 'api-saviour' ? 'API SAVIOUR' : project.title}
+          sections={sections.map(section => ({
+            id: section.id,
+            label: section.label,
+            content: (
+              <MDXRemote 
+                source={section.raw} 
+                components={mdxComponents}
+                options={mdxOptions}
+              />
+            )
+          }))}
         />
-      </CaseStudyClient>
+      </div>
     </main>
   )
 }
+
 
 export default ProjectPage

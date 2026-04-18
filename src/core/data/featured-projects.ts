@@ -62,18 +62,17 @@ export const featuredProjects: readonly FeaturedProject[] = [
     size: 'medium',
   },
   {
-    id: 'vlsi-alu',
-    title: 'VLSI 32-bit ALU',
+    id: 'standard',
+    title: 'The Standard',
     blurb:
-      'Standard-cell 32-bit ALU synthesized and placed in 45nm CMOS. Full DRC/LVS clean sign-off with timing closure at 500MHz.',
-    category: 'VLSI · HARDWARE',
-    domain: 'hardware',
-    tags: ['Cadence', 'Verilog', '45nm CMOS'],
-    href: '/hardware',
+      'A definitive technical manifest for high-performance, type-safe, and deterministic systems design.',
+    category: 'SPEC · INFRA',
+    domain: 'software',
+    tags: ['Architecture', 'Philosophy', 'NixOS', 'Rust'],
+    href: '/standard',
     isExternal: false,
-    year: 2025,
+    year: 2026,
     size: 'medium',
-    comingSoon: true,
   },
 ]
 

@@ -37,6 +37,7 @@ interface HardwareViewerState {
   readonly cameraPosition: readonly [number, number, number]
   readonly isOverlayOpen: boolean
   readonly selectedComponentId: string | null
+  readonly isPaused: boolean
 }
 
 // ─── HERO SHADER STATE ──────────────────────────────────────────────────────
@@ -66,6 +67,7 @@ interface StoreActions {
   setSelectedComponent: (id: string | null) => void
   setCameraPosition: (position: readonly [number, number, number]) => void
   toggleOverlay: () => void
+  setPaused: (paused: boolean) => void
 
   // Hero shader actions (called by the R3F scene)
   setHeroReady: (ready: boolean) => void
@@ -95,6 +97,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
   cameraPosition: [0, 0, 5],
   isOverlayOpen: false,
   selectedComponentId: null,
+  isPaused: true,
 
   // Hero shader initial state
   isHeroReady: false,
@@ -122,6 +125,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
   }),
   setCameraPosition: (cameraPosition) => set({ cameraPosition }),
   toggleOverlay: () => set((state) => ({ isOverlayOpen: !state.isOverlayOpen })),
+  setPaused: (isPaused) => set({ isPaused }),
 
   // ── Hero shader actions ────────────────────────────────────────────────────
   setHeroReady: (ready) => set({ isHeroReady: ready }),
